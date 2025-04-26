@@ -14,3 +14,5 @@ When the time comes, we'll:
         Real professional editor experience
 
 
+Animated fade out of the ✅ Correct! You found the vulnerability. banner
+

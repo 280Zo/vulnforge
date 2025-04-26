@@ -57,6 +57,14 @@ export default function App() {
 
   const [canEdit, setCanEdit] = useState<boolean>(false);
   const [editedCode, setEditedCode] = useState<string>("");
+  const [fixChecked, setFixChecked] = useState<boolean>(false);
+
+  const handleCheckFix = () => {
+    console.log("User submitted fix for checking:", editedCode);
+
+    setFixChecked(true);
+    setFeedbackMessage("✅ Fix submitted for checking!");
+  };
 
   const handleGenerateChallenge = () => {
     if (!provider) {
@@ -85,7 +93,12 @@ export default function App() {
       setIsCorrect(true);
       setFeedbackMessage("✅ Correct! You found the vulnerability.");
       setEditedCode(dummyFiles[selectedFile]);
-      setCanEdit(true); // UNLOCK editing
+      setCanEdit(true);
+
+      // 🛠 Auto-clear the feedback after 3 seconds
+      setTimeout(() => {
+        setFeedbackMessage("");
+      }, 1000);
     } else {
       setIsCorrect(false);
       setFeedbackMessage("❌ Not quite. Try again!");
@@ -166,6 +179,8 @@ export default function App() {
             onSubmitSelectedLines={handleSubmitSelectedLines}
             feedbackMessage={feedbackMessage}
             isCorrect={isCorrect}
+            canEdit={canEdit}
+            onSaveFix={handleCheckFix}
           />
         </div>
       </main>
