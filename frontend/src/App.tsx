@@ -55,6 +55,9 @@ export default function App() {
   const [feedbackMessage, setFeedbackMessage] = useState<string>("");
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
 
+  const [canEdit, setCanEdit] = useState<boolean>(false);
+  const [editedCode, setEditedCode] = useState<string>("");
+
   const handleGenerateChallenge = () => {
     if (!provider) {
       alert("Please select a provider first.");
@@ -81,6 +84,8 @@ export default function App() {
     if (matchFound) {
       setIsCorrect(true);
       setFeedbackMessage("✅ Correct! You found the vulnerability.");
+      setEditedCode(dummyFiles[selectedFile]);
+      setCanEdit(true); // UNLOCK editing
     } else {
       setIsCorrect(false);
       setFeedbackMessage("❌ Not quite. Try again!");
@@ -147,6 +152,9 @@ export default function App() {
               code={dummyFiles[selectedFile]}
               selectedLines={selectedLines}
               setSelectedLines={updateSelectedLines}
+              canEdit={canEdit}
+              editedCode={editedCode}
+              setEditedCode={setEditedCode}
             />
           </div>
         </div>
