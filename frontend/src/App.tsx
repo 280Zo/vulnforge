@@ -23,6 +23,12 @@ def reset_password():
     return input.replace("<", "").replace(">", "")`,
 };
 
+const vulnerableLines: Record<string, number[]> = {
+  "app.py": [9], // just examples for now
+  "models.py": [2],
+  "utils.py": [1],
+};
+
 const availableModels = [
   "codellama:7b-instruct",
   "codellama:13b-instruct",
@@ -46,6 +52,8 @@ export default function App() {
     Record<string, number[]>
   >({});
   const [selectedLines, setSelectedLines] = useState<number[]>([]);
+  const [feedbackMessage, setFeedbackMessage] = useState<string>("");
+  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
 
   const handleGenerateChallenge = () => {
     if (!provider) {
@@ -59,11 +67,24 @@ export default function App() {
       setIsModelModalOpen(true);
     }
   };
+
   const handleSubmitSelectedLines = () => {
     console.log("Selected lines submitted:", selectedLines);
 
-    // TEMP: For now just alert
-    alert(`Submitted lines: ${selectedLines.join(", ")}`);
+    const correctLines = vulnerableLines[selectedFile] || [];
+
+    // Simple check: did they select at least 1 correct line?
+    const matchFound = selectedLines.some((line) =>
+      correctLines.includes(line)
+    );
+
+    if (matchFound) {
+      setIsCorrect(true);
+      setFeedbackMessage("✅ Correct! You found the vulnerability.");
+    } else {
+      setIsCorrect(false);
+      setFeedbackMessage("❌ Not quite. Try again!");
+    }
   };
 
   const handleSelectFile = (fileName: string) => {
@@ -135,6 +156,8 @@ export default function App() {
           <VulnResponse
             selectedLines={selectedLines}
             onSubmitSelectedLines={handleSubmitSelectedLines}
+            feedbackMessage={feedbackMessage}
+            isCorrect={isCorrect}
           />
         </div>
       </main>

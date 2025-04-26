@@ -1,12 +1,21 @@
 interface VulnResponseProps {
   selectedLines: number[];
   onSubmitSelectedLines: () => void;
+  feedbackMessage: string;
+  isCorrect: boolean | null;
 }
 
-export default function VulnResponse({ selectedLines, onSubmitSelectedLines }: VulnResponseProps) {
+export default function VulnResponse({
+  selectedLines,
+  onSubmitSelectedLines,
+  feedbackMessage,
+  isCorrect,
+}: VulnResponseProps) {
   return (
     <div className="bg-white p-6 rounded shadow space-y-4 text-center">
-      <h2 className="text-xl font-semibold">Select the vulnerable line(s) of code</h2>
+      <h2 className="text-xl font-semibold">
+        Select the vulnerable line(s) of code
+      </h2>
       <p className="text-gray-600">
         Click the line(s) you think contain the vulnerability, then submit.
       </p>
@@ -18,6 +27,13 @@ export default function VulnResponse({ selectedLines, onSubmitSelectedLines }: V
         >
           Submit Selected Lines
         </button>
+      )}
+
+      {/* Add feedback inside return */}
+      {isCorrect !== null && (
+        <div className={`text-lg font-semibold ${isCorrect ? "text-green-600" : "text-red-600"}`}>
+          {feedbackMessage}
+        </div>
       )}
     </div>
   );
