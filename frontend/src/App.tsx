@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SettingsPanel from "./components/SettingsPanel";
 import FileExplorer from "./components/FileExplorer";
 import CodeViewer from "./components/CodeViewer";
@@ -29,14 +29,23 @@ const vulnerableLines: Record<string, number[]> = {
   "utils.py": [1],
 };
 
-const availableModels = [
-  "codellama:7b-instruct",
-  "codellama:13b-instruct",
-  "codellama:34b-instruct",
-  "mistral:7b-instruct",
-];
-
 export default function App() {
+  const [availableModels, setAvailableModels] = useState<string[]>([]); // 🛠 dynamic now
+
+  useEffect(() => {
+    // 🛠 Fetch real model list from backend
+    const fetchModels = async () => {
+      try {
+        const response = await fetch("http://localhost:3001/api/list-models");
+        const data = await response.json();
+        setAvailableModels(data.models);
+      } catch (err) {
+        console.error("Failed to fetch models:", err);
+      }
+    };
+
+    fetchModels();
+  }, []);
   const [selectedFile, setSelectedFile] = useState("app.py");
   const [language, setLanguage] = useState("Python");
   const [difficulty, setDifficulty] = useState("medium");

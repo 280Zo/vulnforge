@@ -55,6 +55,20 @@ app.post("/api/check-fix", async (req, res) => {
   }
 });
 
+app.get("/api/list-models", async (req, res) => {
+  try {
+    const tagsResponse = await fetch("http://ollama:11434/api/tags");
+    const tagsData = await tagsResponse.json();
+
+    const modelNames = tagsData.models.map((m) => m.name);
+
+    res.json({ models: modelNames });
+  } catch (err) {
+    console.error("Error listing models:", err);
+    res.status(500).json({ error: "Failed to list models." });
+  }
+});
+
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, '0.0.0.0', () => {
