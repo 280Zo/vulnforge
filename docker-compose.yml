@@ -1,0 +1,35 @@
+version: '3'
+services:
+  ollama:
+    image: ollama/ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    environment:
+      - OLLAMA_MODELS=codellama:34b-instruct
+
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+    working_dir: /app
+    depends_on:
+      - ollama
+    environment:
+      - API_PROVIDER=ollama
+    command: ["node", "server.js"]
+
+  frontend:
+    build: ./frontend/vite-project
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/vite-project:/app
+    working_dir: /app
+    command: ["npm", "run", "dev"]
+
+volumes:
+  ollama-data:
