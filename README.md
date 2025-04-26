@@ -16,3 +16,7 @@ When the time comes, we'll:
 
 Animated fade out of the ✅ Correct! You found the vulnerability. banner
 
+
+The fix can be across multiple files. Make sure the content for each file is saved for edit mode
+
+

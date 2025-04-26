@@ -59,11 +59,34 @@ export default function App() {
   const [editedCode, setEditedCode] = useState<string>("");
   const [fixChecked, setFixChecked] = useState<boolean>(false);
 
-  const handleCheckFix = () => {
-    console.log("User submitted fix for checking:", editedCode);
+  const handleCheckFix = async () => {
+    console.log("Submitting fix for AI check:", editedCode);
 
-    setFixChecked(true);
-    setFeedbackMessage("✅ Fix submitted for checking!");
+    try {
+      const response = await fetch("http://localhost:3001/api/check-fix", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          code: editedCode,
+          filename: selectedFile,
+          language,
+          difficulty,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setFeedbackMessage("✅ Fix confirmed! Vulnerability remediated.");
+      } else {
+        setFeedbackMessage("❌ Fix not sufficient. Try again.");
+      }
+    } catch (error) {
+      console.error("Error checking fix:", error);
+      setFeedbackMessage("❌ Error checking your fix. Please try again.");
+    }
   };
 
   const handleGenerateChallenge = () => {
@@ -122,6 +145,20 @@ export default function App() {
     }
   };
 
+  const handleNewChallenge = () => {
+    // Clear everything back to initial state
+    setSelectedLines([]);
+    setSelectedLinesPerFile({});
+    setFeedbackMessage("");
+    setIsCorrect(null);
+    setCanEdit(false);
+    setEditedCode("");
+    setFixChecked(false);
+
+    // (For now) Reload dummy files — later we'll request new AI-generated code here!
+    // Future step: Request backend for new vulnerable code
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 font-sans flex flex-col">
       {/* Header */}
@@ -144,8 +181,18 @@ export default function App() {
             setDifficulty={setDifficulty}
             provider={provider}
             setProvider={setProvider}
-            onGenerateChallenge={handleGenerateChallenge}
+            setIsAPIKeyModalOpen={setIsAPIKeyModalOpen}
+            setIsModelModalOpen={setIsModelModalOpen}
           />
+        </div>
+
+        <div className="w-full max-w-5xl flex justify-end">
+          <button
+            onClick={handleNewChallenge}
+            className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
+          >
+            + New Challenge
+          </button>
         </div>
 
         {/* Workspace */}
