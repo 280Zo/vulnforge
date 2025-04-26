@@ -8,5 +8,17 @@ services:
       - ollama-data:/root/.ollama
     restart: unless-stopped
 
+  server:
+    build:
+      context: ./server
+    container_name: vulnforge-server
+    ports:
+      - "3001:3001"
+    depends_on:
+      - ollama
+    environment:
+      - NODE_ENV=development
+    restart: unless-stopped
+
 volumes:
   ollama-data:
