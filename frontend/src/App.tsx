@@ -42,6 +42,8 @@ export default function App() {
   const [isAPIKeyModalOpen, setIsAPIKeyModalOpen] = useState(false);
   const [isModelModalOpen, setIsModelModalOpen] = useState(false);
 
+  const [selectedLines, setSelectedLines] = useState<number[]>([]);
+
   const handleGenerateChallenge = () => {
     if (!provider) {
       alert("Please select a provider first.");
@@ -61,7 +63,8 @@ export default function App() {
       <header className="bg-white border-b px-8 py-6 shadow-sm text-center">
         <h1 className="text-3xl font-bold">Vuln Forge</h1>
         <p className="text-sm text-gray-600 mt-2">
-          Review, identify, and fix vulnerabilities in AI governed secure coding challenges.
+          Review, identify, and fix vulnerabilities in AI governed secure coding
+          challenges.
         </p>
       </header>
 
@@ -81,7 +84,10 @@ export default function App() {
         </div>
 
         {/* Workspace */}
-        <div className="w-full max-w-5xl flex bg-white rounded shadow overflow-hidden" style={{ minHeight: "400px" }}>
+        <div
+          className="w-full max-w-5xl flex bg-white rounded shadow overflow-hidden"
+          style={{ minHeight: "400px" }}
+        >
           <div className="w-[250px] bg-gray-50 border-r">
             <FileExplorer
               files={Object.keys(dummyFiles)}
@@ -90,7 +96,11 @@ export default function App() {
             />
           </div>
           <div className="flex-1">
-            <CodeViewer code={dummyFiles[selectedFile]} />
+            <CodeViewer
+              code={dummyFiles[selectedFile]}
+              selectedLines={selectedLines}
+              setSelectedLines={setSelectedLines}
+            />
           </div>
         </div>
 
