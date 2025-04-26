@@ -42,6 +42,9 @@ export default function App() {
   const [isAPIKeyModalOpen, setIsAPIKeyModalOpen] = useState(false);
   const [isModelModalOpen, setIsModelModalOpen] = useState(false);
 
+  const [selectedLinesPerFile, setSelectedLinesPerFile] = useState<
+    Record<string, number[]>
+  >({});
   const [selectedLines, setSelectedLines] = useState<number[]>([]);
 
   const handleGenerateChallenge = () => {
@@ -54,6 +57,29 @@ export default function App() {
       setIsAPIKeyModalOpen(true);
     } else if (provider === "ollama") {
       setIsModelModalOpen(true);
+    }
+  };
+  const handleSubmitSelectedLines = () => {
+    console.log("Selected lines submitted:", selectedLines);
+
+    // TEMP: For now just alert
+    alert(`Submitted lines: ${selectedLines.join(", ")}`);
+  };
+
+  const handleSelectFile = (fileName: string) => {
+    setSelectedFile(fileName);
+
+    // Load previous selections for this file, or empty array if none
+    setSelectedLines(selectedLinesPerFile[fileName] || []);
+  };
+
+  const updateSelectedLines = (lines: number[]) => {
+    setSelectedLines(lines);
+    if (selectedFile) {
+      setSelectedLinesPerFile((prev) => ({
+        ...prev,
+        [selectedFile]: lines,
+      }));
     }
   };
 
@@ -92,21 +118,24 @@ export default function App() {
             <FileExplorer
               files={Object.keys(dummyFiles)}
               selectedFile={selectedFile}
-              setSelectedFile={setSelectedFile}
+              setSelectedFile={handleSelectFile}
             />
           </div>
           <div className="flex-1">
             <CodeViewer
               code={dummyFiles[selectedFile]}
               selectedLines={selectedLines}
-              setSelectedLines={setSelectedLines}
+              setSelectedLines={updateSelectedLines}
             />
           </div>
         </div>
 
         {/* Vuln Response */}
         <div className="w-full max-w-5xl">
-          <VulnResponse />
+          <VulnResponse
+            selectedLines={selectedLines}
+            onSubmitSelectedLines={handleSubmitSelectedLines}
+          />
         </div>
       </main>
 
