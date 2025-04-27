@@ -1,3 +1,7 @@
+# Vuln Forge
+
+This is a casual project I'm playing which leverages AI to help practice secure code review.
+
 # TODO
 
 ## Improve Code Viewer
@@ -17,6 +21,10 @@ Implement CodeMirror for line numbers and real code editor feel
 
 The vulnerability and/or fix can be across multiple files.
 Make sure the content for each individual file is saved for edit mode
+
+**Hint**
+
+Add a "Hint" button that shows the class of vulnerability or some other vague hint
 
 
 ## UI Improvements
@@ -71,6 +79,10 @@ Option 2: (Simple and Good Enough for Now)
 
     If the fetch fails (timeout, etc), don't immediately show error — let user know "Download continuing in background."
 
+**Auto Complete**
+
+Get a list of models and then add it autocomplete to the text entry field
+
 ## Providers
 
 **Gemini and OpenAPI**
@@ -85,3 +97,21 @@ Don't let a new challenge be generated if one is already being generated
 
 It takes a minute to generate a challenge, especially on slow computers.
 Show a status while a new challenge is generated.
+
+## Prompt
+
+**Multi-File**
+Add multi-file generation with enhanced AI prompting:
+
+    "Generate a realistic small app with 2–4 files, spreading functionality across them."
+
+    "The vulnerability must be present across or inside one file, not scattered."
+
+You could even have different challenge types later:
+
+    Simple Mode: One file
+
+    Advanced Mode: Multi-file project
+
+## README
+- Note that local models are probably only good enough for easy level
