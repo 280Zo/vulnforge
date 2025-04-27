@@ -166,7 +166,6 @@ export default function App() {
   const [isLoadingChallenge, setIsLoadingChallenge] = useState(false);
   const [loadingDots, setLoadingDots] = useState("");
 
-
   useEffect(() => {
     const fetchModels = async () => {
       try {
@@ -177,20 +176,20 @@ export default function App() {
         console.error("Failed to fetch models:", err);
       }
     };
-  
+
     fetchModels();
   }, []); // <-- END of first useEffect
-  
+
   useEffect(() => {
     if (!isLoadingChallenge) {
       setLoadingDots(""); // Reset dots when not loading
       return;
     }
-  
+
     const interval = setInterval(() => {
       setLoadingDots((prev) => (prev.length >= 3 ? "" : prev + "."));
     }, 500);
-  
+
     return () => clearInterval(interval);
   }, [isLoadingChallenge]);
   return (
@@ -230,7 +229,16 @@ export default function App() {
                 : "bg-purple-600 hover:bg-purple-700"
             } text-white px-4 py-2 rounded`}
           >
-            {isLoadingChallenge ? `Generating${loadingDots}` : "+ New Challenge"}
+            {isLoadingChallenge ? (
+              <div className="flex items-center justify-center">
+                <span>Generating</span>
+                <span className="inline-block w-[1.5ch] text-left">
+                  {loadingDots}
+                </span>
+              </div>
+            ) : (
+              "+ New Challenge"
+            )}
           </button>
         </div>
 
