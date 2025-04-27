@@ -5,132 +5,104 @@ Right now it's nothing usable. Hang tight.
 
 # TODO
 
-## Language
+- [ ] Implement CodeMirror for line numbers and real code editor feel
 
-## Improve Code Viewer
+  - Install CodeMirror or Monaco
+  - Replace `<textarea>` with `<CodeMirror />`
+  - Automatically get:
+    - Line numbers
+    - Syntax highlight for the selected language
+    - More familiar editor experience
 
-**Response Streaming**
+- [ ] Save File Content
 
-Stream the response directly from AI so users can see the code written in real time
+    The vulnerability and/or fix can be across multiple files.
+    Make sure the content for each individual file is saved for edit mode
 
-**CodeMirror**
+- [ ] Hint
 
-Implement CodeMirror for line numbers and real code editor feel
+    Add a "Hint" button that shows the class of vulnerability or some other vague hint
 
-- Install CodeMirror or Monaco
-- Replace `<textarea>` with `<CodeMirror />`
-- Automatically get:
-  - Line numbers
-  - Syntax highlight for the selected language
-  - More familiar editor experience
+- [x] Dark Mode
 
-**Save Files**
+  Add a dark mode selector
 
-The vulnerability and/or fix can be across multiple files.
-Make sure the content for each individual file is saved for edit mode
+- [ ] Vulnerability Found
 
-**Hint**
+    Animated fade out of the "✅ Correct! You found the vulnerability" banner
 
-Add a "Hint" button that shows the class of vulnerability or some other vague hint
+- [ ] Dialog Boxes
 
+    Only use web app dialog boxes (e.g. model already exists or failed shows a system dialog box)
 
-## UI Improvements
+- [ ] Timing
 
-**Dark Mode**
+    The prompt takes a long time
+    Fix with streaming the code
+      - [ ] Use Event Stream (SSE) instead of fetch
+      - [ ] Pick the best model.
+        - Use a faster quantized model (like Q4_K_M, Q5_K_M, or 8-bit versions)
+        - gemma2:2b-instruct-fp16
+        - llama3:8b-instruct
+      - See section below for prompt details & model settings
+      - [ ] Try to shrink the prompt without losing quality
+      - [ ] Raise num_predict slightly
+      - [ ] Lower temperature slightly
+      - [ ] Use top_p and top_k conservatively
 
-Add a dark mode selector
+- [ ] Update Download a Model Dialog
 
-**Vulnerability Found**
+    Change the recommendation to be actual tags to copy and paste:
+    ```txt
+    recommeneded: gemma2:2b-instruct-fp16
+    ```
+- [ ] Existing Models
+  - Show existing models in drop down so users don't have to go through download flow to select a model
 
-Animated fade out of the "✅ Correct! You found the vulnerability" banner
+- [ ] Better Tracking of Download State
 
-**Dialog Boxes**
+    After a few minutes of downloading it says the download failed (❌ Failed to pull model. Please try again.), even though it's still going on.
 
-Only use web app dialog boxes (e.g. model already exists or failed shows a system dialog box)
+    Option 1: (Good - Add Progress Bar)
 
-**Update Download a Model Dialog**
+        Tell the frontend: "Don't wait forever on fetch, instead use an Event Stream (SSE) or WebSocket"
+        Implement SSE streaming so that the frontend shows real-time % downloaded based on the live progress data from Ollama API.
+        push live JSON chunks to your React app
+        React listens to these and updates the progress bar
 
-Change the recommendation to be actual tags to copy and paste:
-```txt
-recommeneded: codellama:13b
-```
+    Option 2: (Simple and Good Enough for Now)
 
-**Existing Models**
+        When the user clicks "Download", start showing "Downloading..." indefinitely
 
-Have an option for using local models, instead of just downloading a model
+        Only stop showing it if Ollama sends back "model pulled".
 
-## Downloading a Model
+        If the fetch fails (timeout, etc), don't immediately show error — let user know "Download continuing in background."
 
-**Failure Message**
+- [ ] Gemini and OpenAPI
 
-Add better error messages if pulling fails. For example if a user mis-types a model name, or if the download state is not known anymore?
+    Set up integrations with those API endpoints
 
-**Better Tracking of Download State**
+- [ ] New Challenge - Rate Limit
 
-after a few minutes of downloading it says the download failed (❌ Failed to pull model. Please try again.), even though it's still going on.
+    Don't let a new challenge be generated if one is already being generated
 
-Option 1: (Good - Add Progress Bar)
+- [x] New Challenge - Status
 
-    Tell the frontend: "Don't wait forever on fetch, instead use an Event Stream (SSE) or WebSocket"
-    Implement SSE streaming so that the frontend shows real-time % downloaded based on the live progress data from Ollama API.
-    push live JSON chunks to your React app
-    React listens to these and updates the progress bar
+    It takes a minute to generate a challenge, especially on slow computers.
+    Show a status while a new challenge is generated.
 
-Option 2: (Simple and Good Enough for Now)
+- [ ] Multi-File
+    Add multi-file generation with enhanced AI prompting:
 
-    When the user clicks "Download", start showing "Downloading..." indefinitely
+        "Generate a realistic small app with 2–4 files, spreading functionality across them."
 
-    Only stop showing it if Ollama sends back "model pulled".
+        "The vulnerability must be present across or inside one file, not scattered."
 
-    If the fetch fails (timeout, etc), don't immediately show error — let user know "Download continuing in background."
+    You could even have different challenge types later:
 
-**Auto Complete**
+        Simple Mode: One file
 
-Get a list of models and then add it autocomplete to the text entry field
-
-## Providers
-
-**Gemini and OpenAPI**
-
-Set up integrations with those API endpoints
-
-**New Challenge - Rate Limit**
-
-Don't let a new challenge be generated if one is already being generated
-
-**New Challenge - Status**
-
-It takes a minute to generate a challenge, especially on slow computers.
-Show a status while a new challenge is generated.
-
-## Prompt
-
-**Timing**
-
-The prompt takes a long time
-Fix with streaming the code
-  - Use event-driven WebSocket instead of fetch
-Pick the best model. Use a faster quantized model (like Q4_K_M, Q5_K_M, or 8-bit versions)
-  - gemma2:2b-instruct-fp16
-  - llama3:8b-instruct
-Try to shrink the prompt without losing quality
-Raise num_predict slightly
-Lower temperature slightly
-Use top_p and top_k conservatively
-
-
-**Multi-File**
-Add multi-file generation with enhanced AI prompting:
-
-    "Generate a realistic small app with 2–4 files, spreading functionality across them."
-
-    "The vulnerability must be present across or inside one file, not scattered."
-
-You could even have different challenge types later:
-
-    Simple Mode: One file
-
-    Advanced Mode: Multi-file project
+        Advanced Mode: Multi-file project
 
 ## README
 - Note that local models are probably only good enough for easy level
@@ -138,6 +110,10 @@ You could even have different challenge types later:
   - gemma2:2b-instruct-fp16
   - llama3:8b-instruct
 - Prompt
+  - Generate multiple files of executable/related code
+  - There must be a minimum of 10/50/100 lines of code
+  - The code must contain a single vulnerability
+  - You must also return the line number(s) of the vulnerable code
 ```
 You are tasked with generating a secure coding challenge.
 
