@@ -5,6 +5,7 @@ import CodeViewer from "./components/CodeViewer";
 import VulnResponse from "./components/VulnResponse";
 import APIKeyModal from "./components/APIKeyModal";
 import ModelSelectorModal from "./components/ModelSelectorModal";
+import { parseAIResponse } from "./utils/parseAIResponse";
 
 const vulnerableLines: Record<string, number[]> = {
   "app.py": [9], // just examples for now
@@ -57,10 +58,8 @@ export default function App() {
   const [canEdit, setCanEdit] = useState<boolean>(false);
   const [editedCode, setEditedCode] = useState<string>("");
   const [fixChecked, setFixChecked] = useState<boolean>(false);
-
   const handleCheckFix = async () => {
     console.log("Submitting fix for AI check:", editedCode);
-
     try {
       const response = await fetch("http://localhost:3001/api/check-fix", {
         method: "POST",
@@ -74,9 +73,7 @@ export default function App() {
           difficulty,
         }),
       });
-
       const data = await response.json();
-
       if (data.success) {
         setFeedbackMessage("✅ Fix confirmed! Vulnerability remediated.");
       } else {
@@ -87,7 +84,6 @@ export default function App() {
       setFeedbackMessage("❌ Error checking your fix. Please try again.");
     }
   };
-
   const handleGenerateChallenge = () => {
     if (!provider) {
       alert("Please select a provider first.");
@@ -100,7 +96,6 @@ export default function App() {
       setIsModelModalOpen(true);
     }
   };
-
   const handleSubmitSelectedLines = () => {
     console.log("Selected lines submitted:", selectedLines);
 
@@ -126,14 +121,12 @@ export default function App() {
       setFeedbackMessage("❌ Not quite. Try again!");
     }
   };
-
   const handleSelectFile = (fileName: string) => {
     setSelectedFile(fileName);
 
     // Load previous selections for this file, or empty array if none
     setSelectedLines(selectedLinesPerFile[fileName] || []);
   };
-
   const updateSelectedLines = (lines: number[]) => {
     setSelectedLines(lines);
     if (selectedFile) {
@@ -143,9 +136,10 @@ export default function App() {
       }));
     }
   };
-
   const handleNewChallenge = async () => {
-    // Clear everything back to initial state
+    setIsLoadingChallenge(true); // Start loading
+
+    // Reset stuff
     setSelectedLines([]);
     setSelectedLinesPerFile({});
     setFeedbackMessage("");
@@ -156,6 +150,7 @@ export default function App() {
 
     if (!modelName) {
       alert("Please select a model first.");
+      setIsLoadingChallenge(false);
       return;
     }
 
@@ -172,25 +167,57 @@ export default function App() {
 
       const data = await response.json();
 
-      if (data.code) {
-        // TEMP: For now just load it into a single "main.py" file
-        setDummyFiles({
-          "main.py": data.code,
-        });
-        setSelectedFile("main.py");
-      } else {
-        alert("Failed to generate challenge.");
+      const parsedCode = parseAIResponse(data.code);
+
+      if (!parsedCode) {
+        alert("⚠️ The generated challenge was invalid. Please try again.");
+        setIsLoadingChallenge(false);
+        return;
       }
+
+      setDummyFiles({
+        "main.py": parsedCode,
+      });
+      setSelectedFile("main.py");
     } catch (err) {
       console.error("Error generating challenge:", err);
       alert("Error generating challenge. See console.");
+    } finally {
+      setIsLoadingChallenge(false); // End loading
     }
   };
-
   const [dummyFiles, setDummyFiles] = useState<Record<string, string>>({
     "app.py": `# Placeholder - generate new challenge to begin.`,
   });
+  const [isLoadingChallenge, setIsLoadingChallenge] = useState(false);
+  const [loadingDots, setLoadingDots] = useState("");
 
+  useEffect(() => {
+    const fetchModels = async () => {
+      try {
+        const response = await fetch("http://localhost:3001/api/list-models");
+        const data = await response.json();
+        setAvailableModels(data.models);
+      } catch (err) {
+        console.error("Failed to fetch models:", err);
+      }
+    };
+
+    fetchModels();
+  }, []); // <-- END of first useEffect
+
+  useEffect(() => {
+    if (!isLoadingChallenge) {
+      setLoadingDots(""); // Reset dots when not loading
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setLoadingDots((prev) => (prev.length >= 3 ? "" : prev + "."));
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, [isLoadingChallenge]);
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 font-sans flex flex-col">
       {/* Header */}
@@ -227,9 +254,23 @@ export default function App() {
         <div className="w-full max-w-5xl flex justify-end">
           <button
             onClick={handleNewChallenge}
-            className="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600"
+            disabled={isLoadingChallenge}
+            className={`${
+              isLoadingChallenge
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-indigo-500 hover:bg-indigo-600"
+            } text-white px-4 py-2 rounded`}
           >
-            + New Challenge
+            {isLoadingChallenge ? (
+              <div className="flex items-center justify-center">
+                <span>Generating</span>
+                <span className="inline-block w-[1.5ch] text-left">
+                  {loadingDots}
+                </span>
+              </div>
+            ) : (
+              "+ New Challenge"
+            )}
           </button>
         </div>
 
