@@ -89,8 +89,8 @@ app.post("/api/new-challenge", async (req, res) => {
 You are tasked with generating a secure coding challenge.
 
 Rules:
-- Language: [LANGUAGE]
-- Difficulty: [DIFFICULTY]
+- Language: ${language}
+- Difficulty: ${difficulty}
 
 Difficulty Guidelines:
 - Easy:

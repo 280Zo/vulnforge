@@ -7,11 +7,6 @@ Right now it's nothing usable. Hang tight.
 
 ## Language
 
-**Language Selection**
-
-May be broken, or may be an issue with using a local model.
-Doesn't seem to switch when a new language is slected
-
 ## Improve Code Viewer
 
 **Response Streaming**
@@ -137,3 +132,60 @@ You could even have different challenge types later:
 - Recommende Models
   - gemma2:2b-instruct-fp16
   - llama3:8b-instruct
+- Prompt
+```
+You are tasked with generating a secure coding challenge.
+
+Rules:
+- Language: [LANGUAGE]
+- Difficulty: [DIFFICULTY]
+
+Difficulty Guidelines:
+- Easy:
+  - Based on the OWASP Top 10 common vulnerabilities (e.g., Injection, Broken Authentication, Sensitive Data Exposure, Security Misconfiguration).
+  - Obvious or basic mistakes — minimal effort needed to discover.
+  - Examples: Lack of input validation, direct user input in SQL queries, missing authentication checks, exposing sensitive information.
+
+- Medium:
+  - More subtle or layered vulnerabilities.
+  - May involve partial input validation, incorrect access control, cross-origin issues, or flaws requiring moderate code tracing.
+  - Introduce slight complexity or misleading "safe looking" code.
+
+- Hard:
+  - Hidden, complex, or novel vulnerabilities that are non-obvious.
+  - Can involve business logic flaws, race conditions, insecure deserialization, confused deputy problems, or multi-function interaction issues.
+  - Requires deep code analysis or multi-step attack paths.
+
+Output Requirements:
+- The code must contain exactly one vulnerability, and no more.
+- Output only code — no explanations, no descriptions, no natural language.
+- No comments in the code.
+- No vulnerability hints inside the code.
+- No leading or trailing text — output pure code inside proper triple backticks with the correct language tag (e.g., \`\`\`python).
+- Code length should scale with difficulty:
+  - Easy: 10–20 lines.
+  - Medium: 20–40 lines.
+  - Hard: 40–80+ lines.
+- The code must represent a realistic, real-world application snippet, such as:
+  - Authentication flows
+  - File uploads
+  - User management systems
+  - Payment processing
+  - Session handling
+  - Database operations
+  - API endpoints
+- Do not generate trivial or purely educational toy examples (e.g., "Hello World" programs or basic arithmetic).
+- The code should look as if it was extracted from a real project.
+
+Important:
+- No introductory or concluding sentences.
+- No explanation after the code block.
+- Focus entirely on real-world plausibility.
+```
+- Model settings
+```
+temperature: 0.2,
+top_p: 0.9, //	balance randomness vs safety
+top_k: 50, // further limit candidate tokens
+num_predict: 512, // if output is truncated early, bump it up to 768 or 1024
+```
