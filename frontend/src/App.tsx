@@ -15,6 +15,32 @@ const vulnerableLines: Record<string, number[]> = {
 
 export default function App() {
   const [availableModels, setAvailableModels] = useState<string[]>([]);
+
+  // effect for fetching the model
+  useEffect(() => {
+    // Fetch real model list from backend
+    const fetchModels = async () => {
+      try {
+        const response = await fetch("http://localhost:3001/api/list-models");
+        const data = await response.json();
+        setAvailableModels(data.models);
+      } catch (err) {
+        console.error("Failed to fetch models:", err);
+      }
+    };
+
+    fetchModels();
+  }, []);
+  const [darkMode, setDarkMode] = useState(false);
+  // effect for applying dark mode
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [darkMode]);
+
   const [selectedFile, setSelectedFile] = useState("app.py");
   const [language, setLanguage] = useState("Python");
   const [difficulty, setDifficulty] = useState("medium");
@@ -193,14 +219,20 @@ export default function App() {
     return () => clearInterval(interval);
   }, [isLoadingChallenge]);
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-900 font-sans flex flex-col">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 font-sans flex flex-col">
       {/* Header */}
-      <header className="bg-white border-b px-8 py-6 shadow-sm text-center">
-        <h1 className="text-3xl font-bold">Vuln Forge</h1>
-        <p className="text-sm text-gray-600 mt-2">
+      <header className="bg-white dark:bg-gray-800 border-b px-8 py-6 shadow-sm text-center">
+        <h1 className="text-3xl dark:text-gray-100 font-bold">Vuln Forge</h1>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
           Review, identify, and fix vulnerabilities in AI governed secure coding
           challenges.
         </p>
+        <button
+          onClick={() => setDarkMode(!darkMode)}
+          className="absolute top-4 right-8 text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white"
+        >
+          {darkMode ? "Light" : "Dark"}
+        </button>
       </header>
 
       {/* Main Body */}
@@ -226,7 +258,7 @@ export default function App() {
             className={`${
               isLoadingChallenge
                 ? "bg-gray-400 cursor-not-allowed"
-                : "bg-purple-600 hover:bg-purple-700"
+                : "bg-indigo-500 hover:bg-indigo-600"
             } text-white px-4 py-2 rounded`}
           >
             {isLoadingChallenge ? (
@@ -244,10 +276,10 @@ export default function App() {
 
         {/* Workspace */}
         <div
-          className="w-full max-w-5xl flex bg-white rounded shadow overflow-hidden"
+          className="w-full max-w-5xl flex bg-white dark:bg-gray-800 rounded shadow overflow-hidden"
           style={{ minHeight: "400px" }}
         >
-          <div className="w-[250px] bg-gray-50 border-r">
+          <div className="w-[250px] bg-gray-50 border-r dark:bg-gray-800">
             <FileExplorer
               files={Object.keys(dummyFiles)}
               selectedFile={selectedFile}
