@@ -105,14 +105,19 @@ Show a status while a new challenge is generated.
 
 ## Prompt
 
-**Validation**
-
-The validation causes multiple requests. ⚠️ The generated challenge was invalid. Please try again.
-Tune this for better performance.
-
 **Timing**
 
 The prompt takes a long time
+Fix with streaming the code
+  - Use event-driven WebSocket instead of fetch
+Pick the best model. Use a faster quantized model (like Q4_K_M, Q5_K_M, or 8-bit versions)
+  - gemma2:2b-instruct-fp16
+  - llama3:8b-instruct
+Try to shrink the prompt without losing quality
+Raise num_predict slightly
+Lower temperature slightly
+Use top_p and top_k conservatively
+
 
 **Multi-File**
 Add multi-file generation with enhanced AI prompting:
@@ -137,8 +142,8 @@ You could even have different challenge types later:
 You are tasked with generating a secure coding challenge.
 
 Rules:
-- Language: [LANGUAGE]
-- Difficulty: [DIFFICULTY]
+- Language: ${language}
+- Difficulty: ${difficulty}
 
 Difficulty Guidelines:
 - Easy:

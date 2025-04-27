@@ -131,34 +131,62 @@ export default function App() {
     setCanEdit(false);
     setEditedCode("");
     setFixChecked(false);
-
+  
     if (!modelName) {
       alert("Please select a model first.");
       setIsLoadingChallenge(false);
       return;
     }
-
+  
     try {
       const response = await fetch("http://localhost:3001/api/new-challenge", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ model: modelName, language, difficulty }),
       });
-      const data = await response.json();
-      if (!data.code) {
-        alert("⚠️ Failed to generate challenge. Try again.");
-        setIsLoadingChallenge(false);
-        return;
+  
+      if (!response.body) {
+        throw new Error("No response body");
       }
-      setDummyFiles({ "main.py": data.code });
+  
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let fullText = "";
+  
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+  
+        const chunk = decoder.decode(value, { stream: true });
+  
+        // Ollama streams multiple "data: ..." chunks
+        const lines = chunk.split("\n").filter(line => line.startsWith("data: "));
+  
+        for (const line of lines) {
+          const jsonStr = line.replace("data: ", "");
+          if (!jsonStr.trim()) continue;
+  
+          try {
+            const parsed = JSON.parse(jsonStr);
+  
+            if (parsed.response) {
+              fullText += parsed.response;
+              setDummyFiles({ "main.py": fullText });
+            }
+          } catch (e) {
+            console.error("Failed to parse JSON chunk:", jsonStr);
+          }
+        }
+      }
+  
       setSelectedFile("main.py");
     } catch (err) {
       console.error("Error generating challenge:", err);
-      alert("Error generating challenge. See console.");
+      alert("⚠️ Error generating challenge. Please try again.");
     } finally {
       setIsLoadingChallenge(false);
     }
-  };
+  };  
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 font-sans flex flex-col">
