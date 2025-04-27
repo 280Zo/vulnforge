@@ -16,11 +16,11 @@ export default function VulnResponse({
   onSaveFix,
 }: VulnResponseProps) {
   return (
-    <div className="bg-white p-6 rounded shadow space-y-4 text-center">
-      <h2 className="text-xl font-semibold">
+    <div className="bg-white dark:bg-gray-800 p-6 rounded shadow space-y-4 text-center">
+      <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
         Select the vulnerable line(s) of code
       </h2>
-      <p className="text-gray-600">
+      <p className="text-gray-600 dark:text-gray-400">
         Click the line(s) you think contain the vulnerability, then submit.
       </p>
 
