@@ -103,6 +103,14 @@ Right now it's nothing usable. Hang tight.
         Simple Mode: One file
 
         Advanced Mode: Multi-file project
+- [ ] When an API key is saved allow selection of the provider without bringing up the API Key modal
+- [ ] Containerize the front end
+- [ ] Add celebration animations upon successful remediation
+- [ ] Clean up unused files
+- [ ] Organize code into smaller, more manageable files
+- [ ] Add description and topic
+- [ ] Create README
+- [ ] Add screenshots
 
 ## README
 - Note that local models are probably only good enough for easy level
