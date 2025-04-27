@@ -6,23 +6,6 @@ import VulnResponse from "./components/VulnResponse";
 import APIKeyModal from "./components/APIKeyModal";
 import ModelSelectorModal from "./components/ModelSelectorModal";
 
-const dummyFiles: Record<string, string> = {
-  "app.py": `import flask, render_template, request
-from models import user, db
-from validate_input import utils
-
-@app.route('/reset_password', methods=['POST', 'GET'])
-def reset_password():
-    if request.method == 'POST':
-        username = request.form['username']
-        ...`,
-  "models.py": `class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True)`,
-  "utils.py": `def sanitize(input):
-    return input.replace("<", "").replace(">", "")`,
-};
-
 const vulnerableLines: Record<string, number[]> = {
   "app.py": [9], // just examples for now
   "models.py": [2],
@@ -154,7 +137,7 @@ export default function App() {
     }
   };
 
-  const handleNewChallenge = () => {
+  const handleNewChallenge = async () => {
     // Clear everything back to initial state
     setSelectedLines([]);
     setSelectedLinesPerFile({});
@@ -163,10 +146,43 @@ export default function App() {
     setCanEdit(false);
     setEditedCode("");
     setFixChecked(false);
+    
+    if (!modelName) {
+      alert("Please select a model first.");
+      return;
+    }
 
-    // (For now) Reload dummy files — later we'll request new AI-generated code here!
-    // Future step: Request backend for new vulnerable code
+    try {
+      const response = await fetch("http://localhost:3001/api/new-challenge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: modelName,
+          language,
+          difficulty,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.code) {
+        // TEMP: For now just load it into a single "main.py" file
+        setDummyFiles({
+          "main.py": data.code,
+        });
+        setSelectedFile("main.py");
+      } else {
+        alert("Failed to generate challenge.");
+      }
+    } catch (err) {
+      console.error("Error generating challenge:", err);
+      alert("Error generating challenge. See console.");
+    }
   };
+
+  const [dummyFiles, setDummyFiles] = useState<Record<string, string>>({
+    "app.py": `# Placeholder - generate new challenge to begin.`,
+  });
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 font-sans flex flex-col">
