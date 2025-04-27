@@ -134,7 +134,6 @@ Important:
 - No explanation after the code block.
 - Focus entirely on real-world plausibility.
   `;
-  
 
   try {
     const response = await fetch("http://ollama:11434/api/generate", {
@@ -144,6 +143,10 @@ Important:
         model,
         prompt,
         stream: false,
+        temperature: 0.2,
+        top_p: 0.9,
+        top_k: 50,
+        num_predict: 512
       }),
     });
 

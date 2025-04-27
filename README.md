@@ -5,7 +5,18 @@ Right now it's nothing usable. Hang tight.
 
 # TODO
 
+## Language
+
+**Language Selection**
+
+May be broken, or may be an issue with using a local model.
+Doesn't seem to switch when a new language is slected
+
 ## Improve Code Viewer
+
+**Response Streaming**
+
+Stream the response directly from AI so users can see the code written in real time
 
 **CodeMirror**
 
@@ -46,9 +57,7 @@ Only use web app dialog boxes (e.g. model already exists or failed shows a syste
 
 Change the recommendation to be actual tags to copy and paste:
 ```txt
-recommeneded:
-    codellama:13b
-    codellama:34b
+recommeneded: codellama:13b
 ```
 
 **Existing Models**
@@ -101,6 +110,15 @@ Show a status while a new challenge is generated.
 
 ## Prompt
 
+**Validation**
+
+The validation causes multiple requests. ⚠️ The generated challenge was invalid. Please try again.
+Tune this for better performance.
+
+**Timing**
+
+The prompt takes a long time
+
 **Multi-File**
 Add multi-file generation with enhanced AI prompting:
 
@@ -116,3 +134,6 @@ You could even have different challenge types later:
 
 ## README
 - Note that local models are probably only good enough for easy level
+- Recommende Models
+  - gemma2:2b-instruct-fp16
+  - llama3:8b-instruct
