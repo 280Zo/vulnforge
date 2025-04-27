@@ -1,6 +1,7 @@
-# Vuln Forge
+# DRAFT - Vuln Forge
 
-This is a casual project I'm playing which leverages AI to help practice secure code review.
+This will be a casual project which leverages AI to help practice secure code review.
+Right now it's nothing usable. Hang tight.
 
 # TODO
 
