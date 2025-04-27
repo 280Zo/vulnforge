@@ -22,16 +22,17 @@ function SettingsPanel({
 
 
   return (
-    <form
-      className="bg-white p-6 rounded shadow-md space-y-4">
+    <form className="bg-white dark:bg-gray-800 p-6 rounded shadow-md space-y-4">
       <div className="flex flex-wrap gap-4">
         {/* Language Selector */}
         <div className="flex-1 min-w-[200px]">
-          <label className="block font-semibold mb-1">Language</label>
+          <label className="block font-semibold mb-1 text-gray-900 dark:text-gray-100">
+            Language
+          </label>
           <select
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
-            className="w-full border p-2 rounded"
+            className="w-full border p-2 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           >
             <option>Python</option>
             <option>JavaScript</option>
@@ -43,11 +44,13 @@ function SettingsPanel({
 
         {/* Difficulty Selector */}
         <div className="flex-1 min-w-[200px]">
-          <label className="block font-semibold mb-1">Difficulty</label>
+          <label className="block font-semibold mb-1 text-gray-900 dark:text-gray-100">
+            Difficulty
+          </label>
           <select
             value={difficulty}
             onChange={(e) => setDifficulty(e.target.value)}
-            className="w-full border p-2 rounded"
+            className="w-full border p-2 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           >
             <option value="easy">Easy</option>
             <option value="medium">Medium</option>
@@ -57,7 +60,9 @@ function SettingsPanel({
 
         {/* Provider Selector */}
         <div className="flex-1 min-w-[200px]">
-          <label className="block font-semibold mb-1">Provider</label>
+          <label className="block font-semibold mb-1 text-gray-900 dark:text-gray-100">
+            Provider
+          </label>
           <select
             value={provider}
             onChange={(e) => {
@@ -74,7 +79,7 @@ function SettingsPanel({
                 setIsModelModalOpen(true);
               }
             }}
-            className="w-full border p-2 rounded"
+            className="w-full border p-2 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           >
             <option value="" disabled>
               Select Provider
