@@ -95,10 +95,21 @@ Important:
       console.error("Stream error:", err);
       res.end();
     });
-
   } catch (err) {
     console.error("Error generating challenge:", err);
     res.status(500).json({ error: "Failed to generate challenge." });
+  }
+});
+
+app.get("/api/list-models", async (req, res) => {
+  try {
+    const response = await fetch("http://ollama:11434/api/tags");
+    const data = await response.json();
+    const models = (data.models || []).map((model) => model.name);
+    res.json({ models });
+  } catch (err) {
+    console.error("Error fetching model list:", err);
+    res.status(500).json({ error: "Failed to fetch models." });
   }
 });
 

@@ -106,6 +106,7 @@ Right now it's nothing usable. Hang tight.
 - [ ] When an API key is saved allow selection of the provider without bringing up the API Key modal
 - [ ] Containerize the front end
 - [ ] Add celebration animations upon successful remediation
+- [ ] Maybe instead of multi-file we have multi-study (e.g. vuln code, owasp top 10 flash cards, etc. etc.)
 - [ ] Clean up unused files
 - [ ] Organize code into smaller, more manageable files
 - [ ] Add description and topic
@@ -178,3 +179,10 @@ top_p: 0.9, //	balance randomness vs safety
 top_k: 50, // further limit candidate tokens
 num_predict: 512, // if output is truncated early, bump it up to 768 or 1024
 ```
+
+
+
+
+
+It works for the most part. But when I try to select a model it just tries to download it, even if it exists.
+I would like to change the functionality of this. I'd like the drop down to list downloaded models and mark any other provider that has an API key entered already. Can you help me do this?

@@ -23,7 +23,9 @@ export default function App() {
   const [modelName, setModelName] = useState("");
   const [isAPIKeyModalOpen, setIsAPIKeyModalOpen] = useState(false);
   const [isModelModalOpen, setIsModelModalOpen] = useState(false);
-  const [selectedLinesPerFile, setSelectedLinesPerFile] = useState<Record<string, number[]>>({});
+  const [selectedLinesPerFile, setSelectedLinesPerFile] = useState<
+    Record<string, number[]>
+  >({});
   const [selectedLines, setSelectedLines] = useState<number[]>([]);
   const [feedbackMessage, setFeedbackMessage] = useState<string>("");
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -32,22 +34,27 @@ export default function App() {
   const [fixChecked, setFixChecked] = useState<boolean>(false);
   const [isLoadingChallenge, setIsLoadingChallenge] = useState(false);
   const [loadingDots, setLoadingDots] = useState("");
+  const [downloadedModels, setDownloadedModels] = useState<string[]>([]);
   const [dummyFiles, setDummyFiles] = useState<Record<string, string>>({
     "app.py": `# Placeholder - generate new challenge to begin.`,
   });
 
   useEffect(() => {
-    const fetchModels = async () => {
-      try {
-        const response = await fetch("http://localhost:3001/api/list-models");
-        const data = await response.json();
-        setAvailableModels(data.models);
-      } catch (err) {
-        console.error("Failed to fetch models:", err);
-      }
-    };
-    fetchModels();
-  }, []);
+    if (isModelModalOpen) {
+      const fetchModels = async () => {
+        try {
+          const response = await fetch("http://localhost:3001/api/list-models");
+          const data = await response.json();
+          console.log("Fetched models for modal:", data.models);
+          setDownloadedModels(data.models || []);
+        } catch (err) {
+          console.error("Failed to fetch downloaded models:", err);
+        }
+      };
+
+      fetchModels();
+    }
+  }, [isModelModalOpen]);
 
   useEffect(() => {
     if (!isLoadingChallenge) {
@@ -68,15 +75,38 @@ export default function App() {
     }
   }, [darkMode]);
 
+  const handleOpenModelModal = async () => {
+    try {
+      const response = await fetch("http://localhost:3001/api/list-models");
+      const data = await response.json();
+      console.log("Fetched models:", data.models); // 👈 add this
+      setDownloadedModels(data.models || []);
+    } catch (err) {
+      console.error("Failed to fetch downloaded models:", err);
+      setDownloadedModels([]);
+    } finally {
+      setIsModelModalOpen(true);
+    }
+  };
+
   const handleCheckFix = async () => {
     try {
       const response = await fetch("http://localhost:3001/api/check-fix", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: editedCode, filename: selectedFile, language, difficulty }),
+        body: JSON.stringify({
+          code: editedCode,
+          filename: selectedFile,
+          language,
+          difficulty,
+        }),
       });
       const data = await response.json();
-      setFeedbackMessage(data.success ? "✅ Fix confirmed! Vulnerability remediated." : "❌ Fix not sufficient. Try again.");
+      setFeedbackMessage(
+        data.success
+          ? "✅ Fix confirmed! Vulnerability remediated."
+          : "❌ Fix not sufficient. Try again."
+      );
     } catch (error) {
       console.error("Error checking fix:", error);
       setFeedbackMessage("❌ Error checking your fix. Please try again.");
@@ -91,13 +121,15 @@ export default function App() {
     if (provider === "openai" || provider === "gemini") {
       setIsAPIKeyModalOpen(true);
     } else if (provider === "ollama") {
-      setIsModelModalOpen(true);
+      handleOpenModelModal(); // <<< instead of setIsModelModalOpen(true)
     }
   };
 
   const handleSubmitSelectedLines = () => {
     const correctLines = vulnerableLines[selectedFile] || [];
-    const matchFound = selectedLines.some((line) => correctLines.includes(line));
+    const matchFound = selectedLines.some((line) =>
+      correctLines.includes(line)
+    );
     if (matchFound) {
       setIsCorrect(true);
       setFeedbackMessage("✅ Correct! You found the vulnerability.");
@@ -131,44 +163,46 @@ export default function App() {
     setCanEdit(false);
     setEditedCode("");
     setFixChecked(false);
-  
+
     if (!modelName) {
       alert("Please select a model first.");
       setIsLoadingChallenge(false);
       return;
     }
-  
+
     try {
       const response = await fetch("http://localhost:3001/api/new-challenge", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ model: modelName, language, difficulty }),
       });
-  
+
       if (!response.body) {
         throw new Error("No response body");
       }
-  
+
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let fullText = "";
-  
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-  
+
         const chunk = decoder.decode(value, { stream: true });
-  
+
         // Ollama streams multiple "data: ..." chunks
-        const lines = chunk.split("\n").filter(line => line.startsWith("data: "));
-  
+        const lines = chunk
+          .split("\n")
+          .filter((line) => line.startsWith("data: "));
+
         for (const line of lines) {
           const jsonStr = line.replace("data: ", "");
           if (!jsonStr.trim()) continue;
-  
+
           try {
             const parsed = JSON.parse(jsonStr);
-  
+
             if (parsed.response) {
               fullText += parsed.response;
               setDummyFiles({ "main.py": fullText });
@@ -178,7 +212,7 @@ export default function App() {
           }
         }
       }
-  
+
       setSelectedFile("main.py");
     } catch (err) {
       console.error("Error generating challenge:", err);
@@ -186,7 +220,7 @@ export default function App() {
     } finally {
       setIsLoadingChallenge(false);
     }
-  };  
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 font-sans flex flex-col">
@@ -194,7 +228,8 @@ export default function App() {
       <header className="bg-white dark:bg-gray-800 border-b px-8 py-6 shadow-sm text-center">
         <h1 className="text-3xl dark:text-gray-100 font-bold">Vuln Forge</h1>
         <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-          Review, identify, and fix vulnerabilities in AI governed secure coding challenges.
+          Review, identify, and fix vulnerabilities in AI governed secure coding
+          challenges.
         </p>
         <button
           onClick={() => setDarkMode(!darkMode)}
@@ -232,7 +267,9 @@ export default function App() {
             {isLoadingChallenge ? (
               <div className="flex items-center justify-center">
                 <span>Generating</span>
-                <span className="inline-block w-[1.5ch] text-left ml-1">{loadingDots}</span>
+                <span className="inline-block w-[1.5ch] text-left ml-1">
+                  {loadingDots}
+                </span>
               </div>
             ) : (
               "+ New Challenge"
@@ -284,7 +321,8 @@ export default function App() {
       <ModelSelectorModal
         isOpen={isModelModalOpen}
         onClose={() => setIsModelModalOpen(false)}
-        models={availableModels}
+        downloadedModels={downloadedModels}
+        apiKeyExists={!!apiKey}
         onSelectModel={(model) => setModelName(model)}
       />
     </div>
