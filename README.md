@@ -103,6 +103,11 @@ Right now it's nothing usable. Hang tight.
         Simple Mode: One file
 
         Advanced Mode: Multi-file project
+
+- [ ] Adjust the dots after the downloading button
+- [ ] When a model name is entered for downloading, check if it exists first
+- [ ] When a model name is entered for downloading check if it's a valid model.
+- [ ] Should be able to delete an existing model
 - [ ] When an API key is saved allow selection of the provider without bringing up the API Key modal
 - [ ] Containerize the front end
 - [ ] Add celebration animations upon successful remediation

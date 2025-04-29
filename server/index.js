@@ -4,6 +4,79 @@ import fetch from "node-fetch";
 const app = express();
 app.use(express.json());
 
+// Pull a model (streaming status updates back to client)
+app.post("/api/pull-model", async (req, res) => {
+  const { model } = req.body;
+
+  try {
+    // First check if it exists
+    const tagsResponse = await fetch("http://ollama:11434/api/tags");
+    const tagsData = await tagsResponse.json();
+    const exists = tagsData.models.some((m) => m.name.includes(model));
+
+    if (exists) {
+      console.log(`✅ Model ${model} already exists.`);
+      res.json({ success: true, alreadyExists: true });
+      return;
+    }
+
+    console.log(`🚀 Pulling model: ${model}...`);
+
+    const pullResponse = await fetch("http://ollama:11434/api/pull", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: model }),
+    });
+
+    if (!pullResponse.ok) {
+      throw new Error(`Failed to initiate pull: status ${pullResponse.status}`);
+    }
+
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+
+    pullResponse.body.on("data", (chunk) => {
+      const chunkStr = chunk.toString();
+      const lines = chunkStr.split("\n");
+
+      for (const line of lines) {
+        if (!line.trim().startsWith("{")) continue; // Skip junk
+
+        try {
+          const parsed = JSON.parse(line);
+
+          if (parsed.status) {
+            console.log("🔵 Stream Status:", parsed.status);
+            res.write(`data: ${JSON.stringify({ status: parsed.status })}\n\n`);
+          }
+
+          if (parsed.completed) {
+            console.log("✅ Pull completed");
+            res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+            res.end();
+          }
+        } catch (err) {
+          console.error("Failed to parse chunk during pull:", line);
+        }
+      }
+    });
+
+    pullResponse.body.on("end", () => {
+      console.log("✅ Pull stream ended.");
+      res.end();
+    });
+
+    pullResponse.body.on("error", (err) => {
+      console.error("Stream error during pull:", err);
+      res.end();
+    });
+  } catch (err) {
+    console.error("Fatal error pulling model:", err);
+    res.status(500).json({ error: "Failed to pull model." });
+  }
+});
+
 // Pull model route (unchanged)
 app.post("/api/new-challenge", async (req, res) => {
   const { model, language, difficulty } = req.body;
